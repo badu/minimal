@@ -4,7 +4,42 @@
         {{ partial "head-open" . }}
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ .Title }}</title>
+        <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}</title>
+        {{ if .IsHome }}
+            {{ with .Site.Params.description }}<meta name="description" content="{{ . }}">{{ end }}
+        {{ else }}
+            <meta name="description" content="{{ .Description }}">
+        {{ end }}
+        <meta property="site_name" content="{{ .Site.DisqusShortname }}">
+        <meta property="og:type" content="{{ if .IsHome }}website{{ else }}article{{ end }}">
+        <meta property="og:url" content="{{ .URL | absURL }}">
+        <meta property="og:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}">
+        <meta property="og:image" content="{{ .Site.Params.banner }}">
+        {{ if .IsHome }}
+        {{ with .Site.Params.description }}<meta property="og:description" content="{{ . }}">{{ end }}
+        {{ else }}
+            <meta property="og:description" content="{{ .Description }}">
+        {{ end }}
+            <meta name="twitter:url" content="{{ .URL | absURL }}">
+            <meta name="twitter:card" content="summary">
+            <meta name="twitter:site" content="@{{ .Site.DisqusShortname }}">
+            <meta name="twitter:creator" content="@{{ .Site.DisqusShortname }}">
+            <meta name="twitter:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}">
+            <meta name="twitter:img:src" content="{{ .Site.Params.banner }}">
+        {{ if not .IsHome }}
+            <meta name="twitter:label1" content="Author">
+            <meta name="twitter:data1" content="{{ .Site.Params.author }}">
+            <meta name="twitter:label2" content="Published On">
+            <meta name="twitter:data2" content="{{ .Date.Format "January 2, 2006" }}">
+        {{ end }}
+        {{ if .Site.GoogleAnalytics }}
+            <link rel="dns-prefetch" href="//www.google-analytics.com">
+            <link rel="dns-prefetch" href="//stats.g.doubleclick.net">
+        {{ end }}
+        <link rel="canonical" href="{{ .URL | absURL }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+        <link rel="shortcut icon" href="{{ "favicon.ico" | absURL }}">
+
         {{ partial "css" . }} {{ partial "js" . }} {{ .Hugo.Generator }}
         {{ if .RSSLink }}
         <link href="{{ .RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
@@ -27,6 +62,7 @@
                       : cb();
           }
           ready(function() {
+              // reading progress
               var indicator = document.querySelector('.scroll-progress');
               if (indicator) {
                   document.addEventListener('scroll', function (e) {
@@ -37,6 +73,13 @@
                       var perc = pos / (dh - footerHeight - wh) * 100;
                       indicator.style.setProperty('--scale', (perc / 100));
                   })
+              }
+              // all external links should open in a new page
+              var links = document.links;
+              for (var i = 0, linksLength = links.length; i < linksLength; i++) {
+                  if (links[i].hostname != window.location.hostname) {
+                      links[i].target = '_blank';
+                  }
               }
           });
           }());
